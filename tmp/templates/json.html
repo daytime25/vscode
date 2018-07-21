@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <script src="../static/jquery-3.3.1.min.js"></script>
+    <script src="../static/echarts.js"></script>
+</head>
+
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 900px;height:500px;"></div>
+
+</body>
+<script type="text/javascript">
+
+    var myChart = echarts.init(document.getElementById('main'));
+    // 显示标题，图例和空的坐标轴
+
+    myChart.setOption({
+        title: {
+            text: '爬虫今日抓取数据图'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['今日数据']
+        },
+        toolbox: {
+            show: true,
+            feature: {
+                mark: { show: true },
+                dataView: { show: true, readOnly: false },
+                magicType: { show: true, type: ['line', 'bar'] },
+                // restore : {show: true},
+                // saveAsImage : {show: true}
+            }
+        },
+        calculable: true,
+
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value}'
+                }
+            }
+        ],
+        series: [
+            {
+                name: '最多数量',
+                type: 'line',
+                data: [],
+                markPoint: {
+                    data: [
+                        { type: 'max', name: '最大值' },
+                        { type: 'min', name: '最小值' }
+                    ]
+                },
+                markLine: {
+                    data: [
+                        { type: 'average', name: '平均值' }
+                    ]
+                }
+            },]
+    });
+    myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var names = [];    //名称数组（实际用来盛放X轴坐标值）
+    var nums = [];    //数量数组（实际用来盛放Y坐标值）
+
+    $.ajax({
+        type: "get",
+        //       async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url: "http://127.0.0.1:5000/json",    //请求发送到Servlet处
+        //       data : {},
+        dataType: "json",        //返回数据形式为json
+        success: function (result) {
+            //请求成功时执行该函数内容，result即为服务器返回的json对象
+            if (result) {
+                //           	alert(result["data"]);
+                for (var i = 0; i < result["data"].length; i++) {
+                    //                  	alert(result["data"][i]["name"]);
+                    names.push(result["data"][i]["name"]);    //挨个取出名称并填入类别数组
+                }
+                for (var i = 0; i < result["data"].length; i++) {
+                    //                  	alert(result["data"][i]["num"]);
+                    nums.push(result["data"][i]["num"]);    //挨个取出数量并填入销量数组
+                }
+                myChart.hideLoading();    //隐藏加载动画
+                myChart.setOption({        //加载数据图表
+                    xAxis: {
+                        data: names
+                    },
+                    series: [{
+                        // 根据名字对应到相应的系列
+                        name: '数量',
+                        data: nums
+                    }]
+                });
+
+            }
+
+        },
+        error: function (errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart.hideLoading();
+        }
+    })
+</script>
+
+</html>
+
+
+
+
+<!--< script >
+    var jsonobj = JSON.parse('{ "水源井号": 1, "日产水量": "0", "耗电量": "" },{ "水源井号": 2, "日产水量": "1244", "耗电量": "417" },{ "水源井号": 3, "日产水量": "1697", "耗电量": "572" },{ "水源井号": 4, "日产水量": "1275", "耗电量": "489" }, { "水源井号": 5, "日产水量": "901", "耗电量": "698" }, { "水源井号": 6, "日产水量": "0", "耗电量": "" },{ "水源井号": 7, "日产水量": "3637", "耗电量": "1339" },{ "水源井号": 8, "日产水量": "3469", "耗电量": "1227" },{ "水源井号": 9, "日产水量": "3024", "耗电量": "1177" }');
+    for (x in jsonobj) {
+        document.getElementById("name1").innerHTML += "水源井号: " + jsonobj[x].水源井号 + ",日产水量: " + jsonobj[x].日产水量 + ",耗电量: " + jsonobj[x].耗电量 + "<br>";
+
+    }
+
+
+
+</script > -->
+<!--< script>
+    $(document).ready(function () {//将函数绑定到文档的就绪事件（当文档完成加载时） $("button").click(function () { $.getJSON("/json", function (result)
+    { $.each(result, function (i, field) { $("p").append(field + " "); }); }); }); });
+
+
+
+    </script> -->
