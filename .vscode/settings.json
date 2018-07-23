@@ -1,0 +1,5 @@
+{
+    "python.pythonPath": "${workspaceFolder}\\test\\Scripts\\python.exe",
+    "python.formatting.provider": "autopep8",
+    "python.jediEnabled": false
+}

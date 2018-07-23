@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>菜鸟教程(runoob.com)</title>
+    <script src="https://cdn.bootcss.com/jquery/1.10.2/jquery.min.js">
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("button").click(function () {
+                var username = $('#username').val();
+                var password = $('#password').val();
+                var obj = { "username": username, "password": password };
+                var data = JSON.stringify(obj)// 在向服务器发送数据时一般是字符串。
+                //我们可以使用 JSON.stringify() 方法将 JavaScript 对象转换为字符串。 
+                console.log(data)
+                $.post("/weather", data,
+                    function (data, status) {
+                        alert("数据: \n" + data + "\n状态: " + status);
+                });
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+    <input type="text" name="usernam" id="username">
+    <input type="password" name="password" id="password">
+    <button>发送一个 HTTP POST 请求页面并获取返回内容</button>
+
+</body>
+
+</html>
