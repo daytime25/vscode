@@ -15,6 +15,7 @@
 	<script src="../static/echarts.js"></script>
 	<script src="../static/bootstrap.bundle.js"></script>
 	<script src="../static/feather.js"></script>
+	<script src="../static/vintage.js"></script>
 </head>
 
 <body>
@@ -203,6 +204,7 @@
 									<option value="二水厂">二水厂</option>
 									<option value="三水厂">三水厂</option>
 									<option value="四水厂">四水厂</option>
+									<option value="同比">同比</option>
 								</select>
 								<input type="date" class="form-control input-sm" placeholder=".input-sm" name="logdate1" id="logdate1" value="2017-02-23">
 								<input type="date" class="form-control input-sm" placeholder=".input-sm" name="logdate2" id="logdate2" value="2018-02-23">
@@ -248,12 +250,13 @@
 
 		<script type="text/javascript">
 
-			var myChart = echarts.init(document.getElementById('main'));
+			var myChart = echarts.init(document.getElementById('main'), 'vintage');
 
 			var app = {
 				xday: [],
 				yvalue: [],
-				zvalue:[]
+				xday2: [],
+				yvalue2: [],
 			};
 			var username, shuichang, logdate1, logdate2;
 
@@ -274,11 +277,62 @@
 						data: data,  //转化字符串 
 						contentType: 'application/json; charset=UTF-8',
 						dataType: 'JSON', //注意：这里是指希望服务端返回json格式的数据
-						success: function (res) { //成功的话，得到消息
-							console.log(res);
-							console.log(0);
+						success: function (data) {
 							app.xday = data.xdays;
 							app.yvalue = data.yvalues;
+							app.xday2 = data.xdays2;
+							app.yvalue2 = data.yvalues2;
+							myChart.setOption({
+								title: {
+									text: '柱状图动画延迟'
+								},
+								legend: {
+									data: ['bar', 'bar2'],
+									align: 'left'
+								},
+								toolbox: {
+									// y: 'bottom',
+									feature: {
+										magicType: {
+											type: ['stack', 'tiled']
+										},
+										dataView: {},
+										saveAsImage: {
+											pixelRatio: 2
+										}
+									}
+								},
+								tooltip: {},
+								xAxis: {
+									data: app.xday,
+									silent: false,
+									splitLine: {
+										show: false
+									}
+								},
+								yAxis: {
+								},
+								series: [{
+									name: 'bar',
+									type: 'bar',
+									data: app.yvalue,
+									animationDelay: function (idx) {
+										return idx * 10;
+									}
+								}, {
+									name: 'bar2',
+									type: 'bar',
+									data: app.yvalue2,
+									animationDelay: function (idx) {
+										return idx * 10 + 100;
+									}
+								}],
+								animationEasing: 'elasticOut',
+								animationDelayUpdate: function (idx) {
+									return idx * 5;
+								}
+
+							})
 						},
 						error: function (res) {
 							console.log(res);

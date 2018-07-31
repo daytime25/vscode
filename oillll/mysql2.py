@@ -15,13 +15,21 @@ config={'host':'172.16.14.222',#默认127.0.0.1
 cnx = mysql.connector.connect(**config)
 cursor = cnx.cursor()
 
-    
+#同比
+#SELECT t3.*,t4.* FROM (select t1.序号 AS xuhao,SUM(t1.`产水量`) AS chanshui from 一水厂 t1 where t1.日期 >= '2017-02-23' and t1.日期 <= '2018-02-23' and t1.序号 in('1','2','3','4','5','6','7') group by t1.序号 order by t1.序号) t3
+#LEFT JOIN (SELECT t2.序号 AS qunianxuhao,SUM(t2.`产水量`) AS qunianchanshui from 一水厂 t2 where t2.日期 >= '2016-02-23' and t2.日期 <= '2017-02-23' and t2.序号 in('1','2','3','4','5','6','7') group by t2.序号 order by t2.序号) t4 ON t3.xuhao=t4.qunianxuhao;
+#SELECT DATE_SUB('2017-02-23',INTERVAL 1 YEAR);在某个时间点减去某个时间
 
 def sqljs(shuichang,logdate1,logdate2):
     if shuichang=="一水厂":
         select_sql=("SELECT 日期,SUM(一水厂.产水量) FROM shunyizilaishui.一水厂 WHERE 日期>='"+logdate1+"' AND 日期<='"+logdate2+"' AND 一水厂.序号 BETWEEN 1 AND 7 GROUP BY 一水厂.日期")
     elif shuichang=="二水厂":
          select_sql= ("SELECT 日期,SUM(二水厂.产水量) FROM shunyizilaishui.二水厂 WHERE 日期>='"+logdate1+"' AND 日期<='"+logdate2+"' AND 二水厂.序号 BETWEEN 1 AND 4 GROUP BY 二水厂.日期")
+    elif shuichang=="同比":
+         select_sql= ("SELECT t3.*,t4.* FROM (select t1.`日期` AS riqi,SUM(t1.`产水量`) AS chanshui from 一水厂 t1 where t1.日期 >= '"+logdate1+"' and t1.日期 <= '"+logdate2+"' and t1.序号 in('1','2','3','4','5','6','7') group by t1.`日期`) t3 \
+         LEFT JOIN (SELECT t2.`日期` AS qunianriqi,SUM(t2.`产水量`) AS qunianchanshui from 一水厂 t2 where t2.日期 >= DATE_SUB('"+logdate1+"',INTERVAL 1 YEAR) and t2.日期 <= DATE_SUB('"+logdate2+"',INTERVAL 1 YEAR) and t2.序号 in('1','2','3','4','5','6','7') group by t2.`日期`) t4 \
+         ON DATE_FORMAT(t3.riqi,'%m%d')=DATE_FORMAT(t4.qunianriqi,'%m%d');")
+    
     
     try:
         cursor.execute(select_sql)# 执行SQL语句
@@ -30,19 +38,24 @@ def sqljs(shuichang,logdate1,logdate2):
         jsonData = {}
         xdays = []
         yvalues = []
-
+        xdays2 = []
+        yvalues2 = []
         for data in u:
             # xdays.append(str(data[0]))
             xdays.append(data[0])
             yvalues.append(data[1])
+            xdays2.append(data[2])
+            yvalues2.append(data[3])
         print(xdays)
         print(yvalues)
 
         jsonData['xdays']=xdays
         jsonData['yvalues'] = yvalues
+        jsonData['xdays2']=xdays2
+        jsonData['yvalues2'] = yvalues2
         print(jsonData)
         
-    except expression as identifier:
+    except mysql.connector.Error as err:
         print("query table 'mytable' failed.")
         print("Error: {}".format(err.msg))
     else:
@@ -55,4 +68,4 @@ def sqljs(shuichang,logdate1,logdate2):
         return (j)
 
 if __name__ == "__main__":
-    sqljs("一水厂","2018-01-12","2018-02-12")
+    sqljs("同比","2018-01-12","2018-02-12")

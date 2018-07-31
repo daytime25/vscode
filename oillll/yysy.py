@@ -40,11 +40,12 @@ def weather():
         res = query_db("SELECT * FROM weather WHERE id <= 6") #不妨设定：第一次只返回6个数据
     elif request.method == "POST":
         data = request.get_data()
-        print(data.decode("utf-8"))
         json_data = json.loads(data.decode("utf-8"))
-        print(json_data)
-        print(json_data['logdate1'])
-        return "55555"
+        js_data=sqljs(json_data['shuichang'],json_data['logdate1'],json_data['logdate2'])
+        #print(json_data['shuichang'],js_data)
+        #return json.dumps(js_data)
+        resp = Response_headers(js_data)
+        return resp
 
 @app.route('/add')
 def add_numbers():
